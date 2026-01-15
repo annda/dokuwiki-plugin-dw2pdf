@@ -16,7 +16,7 @@ use Mpdf\Container\SimpleContainer;
  *
  * @author Andreas Gohr <andi@splitbrain.org>
  */
-class DokuPdf extends Mpdf
+class DokuMpdf extends Mpdf
 {
     /**
      * DokuPDF constructor.
