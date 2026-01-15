@@ -99,7 +99,14 @@ class ServiceFactory
 
 		$hyphenator = new Hyphenator($mpdf);
 
-		$imageProcessor = new ImageProcessor(
+		$imageProcessorClass = ($this->container
+                && $this->container->has('ImageProcessorClass')
+                && class_exists($this->container->get('ImageProcessorClass')))
+                && is_subclass_of($this->container->get('ImageProcessorClass'), ImageProcessor::class)
+            ? $this->container->get('ImageProcessorClass')
+            : ImageProcessor::class;
+
+        $imageProcessor = new $imageProcessorClass(
 			$mpdf,
 			$otl,
 			$cssManager,

@@ -6,6 +6,7 @@ namespace dokuwiki\plugin\dw2pdf\src;
 
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
+use Mpdf\Container\SimpleContainer;
 
 /**
  * Wrapper around the mpdf library class
@@ -27,20 +28,22 @@ class DokuPdf extends Mpdf
     public function __construct(Config $config, string $lang)
     {
 
-        // FIXME this needs to be passed differently
-        // 'ImageProcessorClass' => DokuImageProcessorDecorator::class,
-        // either by monkeypatching the property to protected or via reflection
-
         $initConfig = $config->getMPdfConfig();
         $initConfig['mode'] = $this->lang2mode($lang);
-        parent::__construct($initConfig);
+
+        // FIXME this requires patched mpdf to actually use ImageProcessor from the container
+        $container = new SimpleContainer([
+            'ImageProcessorClass' => DokuImageProcessorDecorator::class
+        ]);
+
+        parent::__construct($initConfig, $container);
         $this->SetDirectionality($this->lang2direction($lang));
 
         // configure page numbering
         // https://mpdf.github.io/paging/page-numbering.html
         $this->PageNumSubstitutions[] = ['from' => 1, 'reset' => 0, 'type' => '1', 'suppress' => 'off'];
         // add watermark text if configured
-        $this->setWatermarkText($config->getWatermarkText());
+        $this->SetWatermarkText($config->getWatermarkText());
 
         // let mpdf fix local links
         $self = parse_url(DOKU_URL);
