@@ -81,7 +81,9 @@ class ServiceFactory
 			? $this->container->get('localContentLoader')
 			: new LocalContentLoader();
 
-		$assetFetcher = new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
+		$assetFetcher = $this->container && $this->container->has('assetFetcher')
+			? $this->container->get('assetFetcher')
+			: new AssetFetcher($mpdf, $localContentLoader, $httpClient, $logger);
 
 		$cssManager = new CssManager($mpdf, $cache, $sizeConverter, $colorConverter, $assetFetcher);
 
@@ -99,14 +101,7 @@ class ServiceFactory
 
 		$hyphenator = new Hyphenator($mpdf);
 
-		$imageProcessorClass = ($this->container
-                && $this->container->has('ImageProcessorClass')
-                && class_exists($this->container->get('ImageProcessorClass')))
-                && is_subclass_of($this->container->get('ImageProcessorClass'), ImageProcessor::class)
-            ? $this->container->get('ImageProcessorClass')
-            : ImageProcessor::class;
-
-        $imageProcessor = new $imageProcessorClass(
+		$imageProcessor = new ImageProcessor(
 			$mpdf,
 			$otl,
 			$cssManager,
